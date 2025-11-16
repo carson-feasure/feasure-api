@@ -61,15 +61,16 @@ FEASURE_SEARCH_LIBRARY: Dict[str, Any] = {
         # the agent can choose one or more of these for "open".
     },
 
-    # Allowed date placeholders the model can use.
+    # Allowed date values the model should use DIRECTLY in NetSuite filters
+    # (no backend transformation layer).
     "datePlaceholders": [
         "today",
         "yesterday",
-        "7d_ago",
-        "30d_ago",
-        "90d_ago",
-        "start_of_month",
-        "start_of_last_month",
+        "daysago7",
+        "daysago30",
+        "daysago90",
+        "thismonth",
+        "lastmonth",
     ],
 }
 
@@ -222,7 +223,7 @@ def build_search_from_prompt(prompt: str) -> SearchBuilderResult:
         "       \"AND\",\n"
         "       [\"amount\", \"greaterthan\", \"50000\"],\n"
         "       \"AND\",\n"
-        "       [\"trandate\", \"onorafter\", \"30d_ago\"]\n"
+        "       [\"trandate\", \"onorafter\", \"daysago30\"]\n"
         "    ],\n"
         "    \"columns\": [\"tranid\", \"entity\", \"amount\", \"status\", \"trandate\"]\n"
         "  },\n"
@@ -232,8 +233,10 @@ def build_search_from_prompt(prompt: str) -> SearchBuilderResult:
         "4. Use the field IDs and status IDs from the vocabulary when possible.\n"
         "5. Use reasonable default columns so the search is immediately useful.\n"
         "6. When the user does not specify exact amounts or date ranges, infer sensible defaults.\n"
-        "7. For date filters, you may use placeholders like \"30d_ago\", \"7d_ago\", \"today\"; "
-        "   the backend/NetSuite will interpret them.\n"
+        "7. For date filters, ALWAYS use NetSuite-relative date keywords directly as values, "
+        "   such as \"daysago7\", \"daysago30\", \"daysago90\", \"today\", \"yesterday\", "
+        "   \"thismonth\", or \"lastmonth\". For example, for \"last 30 days\" use:\n"
+        "   [\"trandate\", \"onorafter\", \"daysago30\"].\n"
         "8. Never return JavaScript or any code, only the JSON object described above.\n"
     )
 
